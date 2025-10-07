@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.presentation.api.dependencies import get_current_claims, require_scopes
+from app.presentation.api.dependencies_auth import get_current_claims, require_scopes
 
 router = APIRouter(prefix="/users", tags=["users"])
 
