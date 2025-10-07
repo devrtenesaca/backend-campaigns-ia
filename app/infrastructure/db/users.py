@@ -4,6 +4,8 @@ from typing import Optional
 from sqlalchemy import String, Boolean, DateTime, func
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.infrastructure.db.roles import RoleORM
 from .base import Base
 
 class UserORM(Base):
@@ -20,7 +22,7 @@ class UserORM(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     roles: Mapped[list["RoleORM"]] = relationship(
-        secondary="auth.user_roles",  # calificado para evitar ambigüedad
+        secondary="auth.user_roles",
         back_populates="users",
         lazy="selectin",
     )

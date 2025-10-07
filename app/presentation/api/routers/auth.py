@@ -3,8 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from app.presentation.api.schemas.auth_schemas import LoginIn, RefreshIn, TokenPairOut
 
-from app.presentation.api.dependencies import get_db
+from app.presentation.api.dependencies_auth import get_db
 from app.security.auth import (
     verify_password,
     create_access_token,
@@ -19,21 +20,6 @@ from app.config.settings import get_settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
-
-
-# ---------- Schemas ----------
-class LoginIn(BaseModel):
-    email: EmailStr
-    password: str
-
-class TokenPairOut(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-
-class RefreshIn(BaseModel):
-    email: EmailStr
-    refresh_token: str
 
 
 # ---------- Endpoints ----------
@@ -58,7 +44,6 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
         token_hash=hash_refresh(raw_refresh),
         expires_at=now_utc() + settings.REFRESH_TTL
     ))
-    db.commit()
 
     return TokenPairOut(access_token=access, refresh_token=raw_refresh)
 
@@ -110,7 +95,4 @@ def refresh(body: RefreshIn, db: Session = Depends(get_db)):
         token_hash=hash_refresh(new_raw_refresh),
         expires_at=now_utc() + settings.REFRESH_TTL
     ))
-
-    db.commit()
-
     return TokenPairOut(access_token=new_access, refresh_token=new_raw_refresh)

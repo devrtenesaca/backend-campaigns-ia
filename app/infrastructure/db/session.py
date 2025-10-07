@@ -12,6 +12,10 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 def get_session() -> Session:
     db = SessionLocal()
     try:
-        yield db
+        yield db          # el endpoint / use-case trabaja aquí
+        db.commit()       # si todo salió bien
+    except Exception:
+        db.rollback()     # ante cualquier error
+        raise
     finally:
         db.close()
